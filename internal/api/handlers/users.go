@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lucas-simao/api-tasks/internal/domain/users"
 	"github.com/lucas-simao/api-tasks/internal/entity"
+	"github.com/lucas-simao/api-tasks/internal/repository"
 )
 
 func SignUp(u users.Service) echo.HandlerFunc {
@@ -30,6 +31,11 @@ func SignUp(u users.Service) echo.HandlerFunc {
 
 		err = u.SignUp(ctx, p)
 		if err != nil {
+			if errors.Is(err, repository.ErrUsernameUnavailable) {
+				result.Message = fmt.Sprintf("%v", err)
+				return c.JSON(http.StatusBadRequest, result)
+			}
+
 			result.Message = fmt.Sprintf("error to sign up: %v", err)
 			return c.JSON(http.StatusInternalServerError, result)
 		}
@@ -64,7 +70,7 @@ func SignIn(u users.Service) echo.HandlerFunc {
 				return c.JSON(http.StatusForbidden, result)
 			}
 
-			result.Message = fmt.Sprintf("error to sign up: %v", err)
+			result.Message = fmt.Sprintf("error to sign in: %v", err)
 			return c.JSON(http.StatusInternalServerError, result)
 		}
 

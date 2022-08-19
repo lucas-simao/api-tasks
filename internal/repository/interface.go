@@ -9,4 +9,5 @@ import (
 type Repository interface {
 	SignUp(context.Context, entity.SignUpRequest) error
 	SignIn(context.Context, string) (entity.User, error)
+	GetUserRoleByCode(context.Context, int) (entity.UserRole, error)
 }

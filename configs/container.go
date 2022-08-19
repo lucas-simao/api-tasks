@@ -8,17 +8,19 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
 )
 
 var (
-	user       = "postgres"
+	user       = "root"
 	password   = "secret"
-	database   = "postgres"
-	port       = "5532"
-	dataSource = "postgres://%s:%s@localhost:%s/%s?sslmode=disable"
+	database   = "api"
+	port       = "3310"
+	dataSource = "%s:%s@tcp(localhost:%s)/%s"
 )
 
 type Container struct {
@@ -34,19 +36,19 @@ func ContainerRun() *Container {
 	}
 
 	opts := dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "13",
+		Repository: "mysql",
+		Tag:        "8",
 		Env: []string{
-			"POSTGRES_USER=" + user,
-			"POSTGRES_PASSWORD=" + password,
-			"POSTGRES_DB=" + database,
+			"MYSQL_DATABASE=" + database,
+			"MYSQL_ROOT_PASSWORD=" + password,
 		},
-		ExposedPorts: []string{"5432"},
+		ExposedPorts: []string{"3306"},
 		PortBindings: map[docker.Port][]docker.PortBinding{
-			"5432": {
+			"3306": {
 				{HostIP: "0.0.0.0", HostPort: port},
 			},
 		},
+		Cmd: []string{"--default-authentication-plugin=mysql_native_password"},
 	}
 
 	resource, err := pool.RunWithOptions(&opts, func(config *docker.HostConfig) {
@@ -61,9 +63,9 @@ func ContainerRun() *Container {
 
 	time.Sleep(10 * time.Second)
 
-	var postgresUrl = fmt.Sprintf(dataSource, user, password, port, database)
+	var mysqlUrl = fmt.Sprintf(dataSource, user, password, port, database)
 
-	db, err := sqlx.Connect("postgres", postgresUrl)
+	db, err := sqlx.Connect("mysql", mysqlUrl)
 	if err != nil {
 		log.Panic(err)
 		return &Container{}
@@ -74,7 +76,7 @@ func ContainerRun() *Container {
 		log.Print(err)
 	}
 
-	os.Setenv("DATABASE_URL", postgresUrl)
+	os.Setenv("DATABASE_URL", mysqlUrl)
 
 	return &Container{
 		db, pool, resource,
@@ -101,9 +103,16 @@ func (c *Container) RunMigrations(migrationsDir string) {
 			if err != nil {
 				log.Fatalf("Error read file: %s, %v", files[i].Name(), err)
 			}
-			_, err = c.DB.Exec(string(fileData))
-			if err != nil {
-				log.Fatalf("Error run migrations: %v", err)
+
+			requests := strings.Split(strings.TrimSpace(string(fileData)), ";")
+
+			for _, request := range requests {
+				if len(request) > 5 {
+					_, err = c.DB.Exec(request)
+					if err != nil {
+						log.Fatalf("Error run migrations: %v", err)
+					}
+				}
 			}
 		}
 	}

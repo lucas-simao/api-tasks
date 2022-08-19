@@ -19,12 +19,7 @@ func New() Repository {
 		log.Panic("Error to get DATABASE_URL")
 	}
 
-	driverName, ok := os.LookupEnv("DATABASE_TYPE")
-	if !ok {
-		log.Panic("Error to get DATABASE_TYPE")
-	}
-
-	newDb, err := sqlx.Connect(driverName, dataSource)
+	newDb, err := sqlx.Connect("mysql", dataSource)
 	if err != nil {
 		log.Panic(err)
 		return &repository{}
