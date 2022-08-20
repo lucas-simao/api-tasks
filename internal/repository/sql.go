@@ -17,6 +17,24 @@ var (
 
 	// tasks
 	sqlCreateTask = `
-		INSERT INTO tasks (title, description, user_id) VALUES(?, ?, ?)
+		INSERT INTO tasks (title, description, created_by_user_id) VALUES(?, ?, ?)
+	`
+	sqlSearchTasks = `
+		SELECT
+			t.id,
+			t.title,
+			t.description,
+			cby.id AS created_by_id,
+			cby.name AS created_by_name,
+			t.created_at,
+			COALESCE(dby.id, 0) AS deleted_by_id,
+			COALESCE(dby.name, '') AS deleted_by_name,
+			COALESCE(t.deleted_at, "") AS deleted_at,
+			t.updated_at,
+			COALESCE(t.finished_at, "") AS finished_at
+		FROM tasks t
+		LEFT JOIN users cby ON cby.id = t.created_by_user_id
+		LEFT JOIN users dby ON dby.id = t.deleted_by_user_id
+		WHERE true
 	`
 )

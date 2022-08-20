@@ -8,4 +8,5 @@ import (
 
 type Service interface {
 	CreateTask(context.Context, entity.TaskRequest) (int64, error)
+	SearchTasks(context.Context, int, int) ([]entity.TaskResponse, error)
 }

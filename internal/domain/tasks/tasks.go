@@ -20,3 +20,7 @@ func New(r repository.Repository) Service {
 func (s service) CreateTask(ctx context.Context, t entity.TaskRequest) (int64, error) {
 	return s.repository.CreateTask(ctx, t)
 }
+
+func (s service) SearchTasks(ctx context.Context, userId, roleCode int) ([]entity.TaskResponse, error) {
+	return s.repository.SearchTasks(ctx, userId, roleCode)
+}

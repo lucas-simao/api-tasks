@@ -20,7 +20,7 @@ var (
 	password   = "secret"
 	database   = "api"
 	port       = "3322"
-	dataSource = "%s:%s@tcp(localhost:%s)/%s"
+	dataSource = "%s:%s@tcp(localhost:%s)/%s?parseTime=true"
 )
 
 type Container struct {

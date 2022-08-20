@@ -23,12 +23,14 @@ CREATE TABLE IF NOT EXISTS tasks (
   id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(100) NOT NULL,
   description VARCHAR(2500) NOT NULL,
-  user_id INT(11) NOT NULL,
+  created_by_user_id INT(11) NOT NULL,
+  deleted_by_user_id INT(11) DEFAULT NULL,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   finished_at TIMESTAMP DEFAULT NULL,
   deleted_at TIMESTAMP  DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users (id)
+  FOREIGN KEY (created_by_user_id) REFERENCES users (id),
+  FOREIGN KEY (deleted_by_user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS migrations (

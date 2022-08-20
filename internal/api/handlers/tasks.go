@@ -47,3 +47,30 @@ func CreateTask(s tasks.Service) echo.HandlerFunc {
 		})
 	}
 }
+
+func SearchTasks(s tasks.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+
+		session := GetAuthSession(c)
+
+		if session.Id == 0 {
+			result.Message = "user unauthorized to create tasks"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		tasks, err := s.SearchTasks(ctx, session.Id, session.CodeRole)
+		if err != nil {
+			result.Message = fmt.Sprintf("error to get tasks: %v", err)
+			return c.JSON(http.StatusInternalServerError, result)
+		}
+
+		var httpStatus int = http.StatusNoContent
+
+		if len(tasks) > 0 {
+			httpStatus = http.StatusOK
+		}
+
+		return c.JSON(httpStatus, tasks)
+	}
+}

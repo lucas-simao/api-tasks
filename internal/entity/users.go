@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"database/sql"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -73,12 +72,17 @@ func (c TaskRequest) Validate() error {
 }
 
 type TaskResponse struct {
-	Id          int          `json:"id" db:"id"`
-	Title       string       `json:"title" db:"title"`
-	Description string       `json:"description" db:"description"`
-	UserId      int          `json:"user_id" db:"user_id"`
-	UpdatedAt   time.Time    `json:"updatedAt" db:"updated_at"`
-	FinishedAt  sql.NullTime `json:"finishedAt" db:"finished_at"`
-	DeletedAt   sql.NullTime `json:"deletedAt" db:"deleted_at"`
-	CreatedAt   time.Time    `json:"createdAt" db:"created_at"`
+	Id          int                       `json:"id"`
+	Title       string                    `json:"title"`
+	Description string                    `json:"description"`
+	UpdatedAt   time.Time                 `json:"updatedAt"`
+	FinishedAt  string                    `json:"finishedAt"`
+	CreatedBy   TaskUserOperationResponse `json:"createdBy"`
+	DeletedBy   TaskUserOperationResponse `json:"deletedBy"`
+}
+
+type TaskUserOperationResponse struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Date string `json:"date"`
 }
