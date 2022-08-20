@@ -5,9 +5,9 @@ import (
 	"errors"
 	"os"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/lucas-simao/api-tasks/internal/entity"
 	"github.com/lucas-simao/api-tasks/internal/repository"
+	"github.com/lucas-simao/api-tasks/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -50,23 +50,14 @@ func (s service) SignIn(ctx context.Context, u entity.SignInRequest) (string, er
 		return "", ErrUserWithoutValidRole
 	}
 
-	claims := &entity.JwtCustomClaims{
-		Id:       userDB.Id,
-		Name:     userDB.Name,
-		Username: userDB.Username,
-		CodeRole: userDB.CodeRole,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
 	secret := os.Getenv("JWT_SECRET")
 
-	tokenSigned, err := token.SignedString([]byte(secret))
+	token, err := utils.GenerateToken(secret, userDB)
 	if err != nil {
 		return "", err
 	}
 
-	return tokenSigned, nil
+	return token, nil
 }
 
 func (s service) EncryptPassword(password string) (string, error) {

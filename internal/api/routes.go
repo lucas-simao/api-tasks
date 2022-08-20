@@ -23,13 +23,9 @@ func addRoutes(e *echo.Echo, s Services) {
 }
 
 func JwtConfig() middleware.JWTConfig {
-	secret := os.Getenv("JWT_SECRET")
-
-	signingKey := []byte(secret)
-
 	config := middleware.JWTConfig{
 		Claims:     &entity.JwtCustomClaims{},
-		SigningKey: signingKey,
+		SigningKey: []byte(os.Getenv("JWT_SECRET")),
 	}
 
 	return config

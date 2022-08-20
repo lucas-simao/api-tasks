@@ -138,7 +138,7 @@ func (suite *UsersTestSuite) TestSignIn() {
 
 	for _, key := range keys {
 		suite.Run(key, func() {
-			c, rr := RecordedEchoContext(http.MethodPost, "/sign-in", strings.NewReader(cases[key].body))
+			c, rr := createContext(http.MethodPost, "/sign-in", strings.NewReader(cases[key].body))
 
 			handler := SignIn(UsersService)
 
@@ -157,7 +157,7 @@ func (suite *UsersTestSuite) TestSignIn() {
 }
 
 func singUp(payload string) (*httptest.ResponseRecorder, error) {
-	c, rr := RecordedEchoContext(http.MethodPost, "/sign-up", strings.NewReader(payload))
+	c, rr := createContext(http.MethodPost, "/sign-up", strings.NewReader(payload))
 
 	handler := SignUp(UsersService)
 
