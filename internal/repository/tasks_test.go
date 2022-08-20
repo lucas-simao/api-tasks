@@ -64,3 +64,55 @@ func (suite *TasksTestSuite) TestCreateTask() {
 		})
 	}
 }
+
+func (suite *TasksTestSuite) TestSearchTasks() {
+
+	_, err := repo.CreateTask(suite.ctx, entity.TaskRequest{
+		Title:       "test1",
+		Description: "test1 for test1",
+		UserId:      TechnicianUser.Id,
+	})
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		userId, roleCode int
+		haveTasks        bool
+		err              error
+	}{
+		"1 - Should return tasks": {
+			userId:    TechnicianUser.Id,
+			roleCode:  TechnicianUser.CodeRole,
+			haveTasks: true,
+			err:       nil,
+		},
+		"2 - Shouldn't return": {
+			userId:   ManagerUser.Id,
+			roleCode: ManagerUser.CodeRole,
+			err:      nil,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+			tasks, err := repo.SearchTasks(suite.ctx, cases[key].userId, cases[key].roleCode)
+			if err != nil {
+				suite.Equal(cases[key].err, err)
+				return
+			}
+
+			suite.NoError(err)
+
+			if cases[key].haveTasks {
+				suite.GreaterOrEqual(len(tasks), 1)
+				suite.Equal(tasks[0].CreatedBy.Id, cases[key].userId)
+			}
+		})
+	}
+}
