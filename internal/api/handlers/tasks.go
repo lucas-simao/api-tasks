@@ -55,7 +55,7 @@ func SearchTasks(s tasks.Service) echo.HandlerFunc {
 		session := GetAuthSession(c)
 
 		if session.Id == 0 {
-			result.Message = "user unauthorized to create tasks"
+			result.Message = "user unauthorized"
 			return c.JSON(http.StatusBadRequest, result)
 		}
 

@@ -24,6 +24,11 @@ func (suite *TasksTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 }
 
+func (suite *TasksTestSuite) TearDownTest() {
+	err := deleteTasks()
+	suite.NoError(err)
+}
+
 func (suite *TasksTestSuite) TestCreateTask() {
 	cases := map[string]struct {
 		body       string
@@ -73,4 +78,63 @@ func (suite *TasksTestSuite) TestCreateTask() {
 			suite.Equal(cases[key].statusCode, rr.Code, rr.Body)
 		})
 	}
+}
+
+func (suite *TasksTestSuite) TestSearchTasks() {
+	_, err := createTask("teste search", "this test should return test", TechnicianUser.Id)
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		user       entity.User
+		statusCode int
+	}{
+		"1 - Should return 200": {
+			user:       TechnicianUser,
+			statusCode: http.StatusOK,
+		},
+		"2 - Should return 200 - Manager can see all tasks": {
+			user:       ManagerUser,
+			statusCode: http.StatusOK,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+
+			c, rr := createContextAuth(http.MethodGet, "/tasks", nil, cases[key].user)
+
+			handler := SearchTasks(TasksService)
+
+			err := handler(c)
+
+			suite.NoError(err)
+
+			suite.Equal(cases[key].statusCode, rr.Code, rr.Body)
+		})
+	}
+}
+
+func createTask(title, description string, userId int) (int64, error) {
+	result, err := DB.Exec(`INSERT INTO tasks (title, description, created_by_user_id) VALUES(?, ?, ?)`, title, description, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	return result.LastInsertId()
+}
+
+func deleteTasks() error {
+	_, err := DB.Exec(`DELETE FROM tasks`)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
