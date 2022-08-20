@@ -19,7 +19,7 @@ var (
 	user       = "root"
 	password   = "secret"
 	database   = "api"
-	port       = "3310"
+	port       = "3322"
 	dataSource = "%s:%s@tcp(localhost:%s)/%s"
 )
 

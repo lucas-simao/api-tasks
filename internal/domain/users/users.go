@@ -26,11 +26,6 @@ var (
 	ErrUserWithoutValidRole = errors.New("user don't have valid role")
 )
 
-type jwtCustomClaims struct {
-	entity.User
-	jwt.StandardClaims
-}
-
 func (s service) SignUp(ctx context.Context, u entity.SignUpRequest) error {
 	password, err := s.EncryptPassword(u.Password)
 	if err != nil {
@@ -55,9 +50,11 @@ func (s service) SignIn(ctx context.Context, u entity.SignInRequest) (string, er
 		return "", ErrUserWithoutValidRole
 	}
 
-	claims := &jwtCustomClaims{
-		userDB,
-		jwt.StandardClaims{},
+	claims := &entity.JwtCustomClaims{
+		Id:       userDB.Id,
+		Name:     userDB.Name,
+		Username: userDB.Username,
+		CodeRole: userDB.CodeRole,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
