@@ -141,7 +141,7 @@ func (suite *TasksTestSuite) TestGetTaskById() {
 			taskId:     int(taskId),
 			statusCode: http.StatusOK,
 		},
-		"2 - Should return 204 - task not exist": {
+		"3 - Should return 204 - task not exist": {
 			user:       TechnicianUser,
 			taskId:     0,
 			statusCode: http.StatusNoContent,
@@ -198,7 +198,7 @@ func (suite *TasksTestSuite) TestDeleteTaskById() {
 			taskId:     int(taskId),
 			statusCode: http.StatusNoContent,
 		},
-		"3 - Should return 204 - task not exist": {
+		"4 - Should return 204 - task not exist": {
 			user:       ManagerUser,
 			taskId:     0,
 			statusCode: http.StatusNoContent,
@@ -221,6 +221,120 @@ func (suite *TasksTestSuite) TestDeleteTaskById() {
 			c.SetParamValues(strconv.Itoa(cases[key].taskId))
 
 			handler := DeleteTaskById(TasksService)
+
+			err := handler(c)
+
+			suite.NoError(err)
+
+			suite.Equal(cases[key].statusCode, rr.Code, rr.Body)
+		})
+	}
+}
+
+func (suite *TasksTestSuite) TestUpdateTaskById() {
+	taskId, err := createTask("test update task", "this test should updated", TechnicianUser.Id)
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		taskId     int
+		body       string
+		user       entity.User
+		statusCode int
+	}{
+		"1 - Should return 200": {
+			user:       TechnicianUser,
+			taskId:     int(taskId),
+			body:       `{ "title": "test", "description": "test test"}`,
+			statusCode: http.StatusOK,
+		},
+		"2 - Should return 400 - empty title": {
+			user:       TechnicianUser,
+			taskId:     int(taskId),
+			body:       `{ "title": "", "description": "test test"}`,
+			statusCode: http.StatusBadRequest,
+		},
+		"3 - Should return 400 - empty description": {
+			user:       TechnicianUser,
+			taskId:     int(taskId),
+			body:       `{ "title": "test", "description": ""}`,
+			statusCode: http.StatusBadRequest,
+		},
+		"4 - Should return 204 - task not exist": {
+			user:       TechnicianUser,
+			taskId:     0,
+			body:       `{ "title": "test", "description": "test test"}`,
+			statusCode: http.StatusNoContent,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+
+			c, rr := createContextAuth(http.MethodPut, "/tasks/:id", strings.NewReader(cases[key].body), cases[key].user)
+
+			c.SetParamNames("id")
+			c.SetParamValues(strconv.Itoa(cases[key].taskId))
+
+			handler := UpdateTaskById(TasksService)
+
+			err := handler(c)
+
+			suite.NoError(err)
+
+			suite.Equal(cases[key].statusCode, rr.Code, rr.Body)
+		})
+	}
+}
+
+func (suite *TasksTestSuite) TestFinishTaskById() {
+	taskId, err := createTask("test finish task", "this test should finish task", TechnicianUser.Id)
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		taskId     int
+		user       entity.User
+		statusCode int
+	}{
+		"1 - Should return 200": {
+			user:       TechnicianUser,
+			taskId:     int(taskId),
+			statusCode: http.StatusOK,
+		},
+		"2 - Should return 204 - task not exist": {
+			user:       TechnicianUser,
+			taskId:     0,
+			statusCode: http.StatusNoContent,
+		},
+		"3 - Should return 400 - without permission": {
+			user:       ManagerUser,
+			taskId:     int(taskId),
+			statusCode: http.StatusBadRequest,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+
+			c, rr := createContextAuth(http.MethodPatch, "/tasks/:id", nil, cases[key].user)
+
+			c.SetParamNames("id")
+			c.SetParamValues(strconv.Itoa(cases[key].taskId))
+
+			handler := FinishTaskById(TasksService)
 
 			err := handler(c)
 
