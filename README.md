@@ -6,21 +6,33 @@
 * [Go](https://golang.org/doc/install) >= 1.16
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker-compose](https://docs.docker.com/compose/)
+* [DBeaver](https://dbeaver.io/download/) <b>or Database Tool of your choice</b>
 * [Postman](https://www.postman.com/downloads/) <b><-Import postman collection from /scripts/API TASKS.postman_collection.json</b>
-* MySQL 8
+
 ### See all help commands
 ```
 make help
 ```
 
-### Run api
+### Create database tables
+* copy and execute all content inside the scripts/migrations/*.up.sql
+
+### Run api - teste only
 ```
-make copy-env
-make api-up
+make copy-env   #Copy .env.example to home 
+make api-up     #Run api
+```
+
+### Build and run api
+```
+make storage-up
+make build-api
+make run-api
 ```
 
 ### Project tree
 ````
+.
 ├── EXERCISE.md
 ├── Makefile
 ├── README.md
@@ -28,7 +40,10 @@ make api-up
 │   └── container.go
 ├── coverage.out
 ├── deployments
-│   └── docker-compose.yml
+│   ├── Dockerfile
+│   ├── deployment.yml
+│   ├── docker-compose.yml
+│   └── service.yml
 ├── go.mod
 ├── go.sum
 ├── internal

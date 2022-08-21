@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/lucas-simao/api-tasks/internal/api"
@@ -11,9 +12,12 @@ import (
 )
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Panic("Error to load .env in the root directory")
+	var isProduction = os.Getenv("IS_PRODUCTION")
+	if isProduction == "" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Panic("Error to load .env in the root directory")
+		}
 	}
 
 	// Database
