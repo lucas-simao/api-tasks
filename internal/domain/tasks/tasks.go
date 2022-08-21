@@ -21,6 +21,10 @@ func (s service) CreateTask(ctx context.Context, t entity.TaskRequest) (int64, e
 	return s.repository.CreateTask(ctx, t)
 }
 
-func (s service) SearchTasks(ctx context.Context, userId, roleCode int) ([]entity.TaskResponse, error) {
-	return s.repository.SearchTasks(ctx, userId, roleCode)
+func (s service) GetTasks(ctx context.Context, userId, roleCode int) ([]entity.TaskResponse, error) {
+	return s.repository.GetTasks(ctx, userId, roleCode)
+}
+
+func (s service) GetTaskById(ctx context.Context, taskId, userId, roleCode int) (entity.TaskResponse, error) {
+	return s.repository.GetTaskById(ctx, taskId, userId, roleCode)
 }

@@ -10,6 +10,7 @@ import (
 
 var (
 	ErrTaskWithoutUser = errors.New("user id cannot be empty")
+	ErrNoTaskInResult  = errors.New("task not found")
 )
 
 func (r *repository) CreateTask(ctx context.Context, t entity.TaskRequest) (int64, error) {
@@ -29,10 +30,10 @@ func (r *repository) CreateTask(ctx context.Context, t entity.TaskRequest) (int6
 	return id, nil
 }
 
-func (r *repository) SearchTasks(ctx context.Context, userId, roleCode int) ([]entity.TaskResponse, error) {
+func (r *repository) GetTasks(ctx context.Context, userId, roleCode int) ([]entity.TaskResponse, error) {
 	var args []interface{}
 
-	sql := sqlSearchTasks
+	sql := sqlGetTasks
 
 	if roleCode == entity.TechnicianRole {
 		sql += ` AND created_by_user_id=?`
@@ -70,4 +71,42 @@ func (r *repository) SearchTasks(ctx context.Context, userId, roleCode int) ([]e
 	}
 
 	return tasks, nil
+}
+
+func (r *repository) GetTaskById(ctx context.Context, taskId, userId, roleCode int) (entity.TaskResponse, error) {
+	var args []interface{}
+
+	sql := sqlGetTasks
+
+	sql += ` AND t.id=?`
+	args = append(args, taskId)
+
+	if roleCode == entity.TechnicianRole {
+		sql += ` AND created_by_user_id=?`
+		args = append(args, userId)
+	}
+
+	t := entity.TaskResponse{}
+
+	err := r.db.QueryRowContext(ctx, sql, args...).Scan(
+		&t.Id,
+		&t.Title,
+		&t.Description,
+		&t.CreatedBy.Id,
+		&t.CreatedBy.Name,
+		&t.CreatedBy.Date,
+		&t.DeletedBy.Id,
+		&t.DeletedBy.Name,
+		&t.DeletedBy.Date,
+		&t.UpdatedAt,
+		&t.FinishedAt,
+	)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return entity.TaskResponse{}, ErrNoTaskInResult
+		}
+		return entity.TaskResponse{}, err
+	}
+
+	return t, nil
 }

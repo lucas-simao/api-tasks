@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lucas-simao/api-tasks/internal/domain/tasks"
 	"github.com/lucas-simao/api-tasks/internal/entity"
+	"github.com/lucas-simao/api-tasks/internal/repository"
 )
 
 func CreateTask(s tasks.Service) echo.HandlerFunc {
@@ -48,7 +51,7 @@ func CreateTask(s tasks.Service) echo.HandlerFunc {
 	}
 }
 
-func SearchTasks(s tasks.Service) echo.HandlerFunc {
+func GetTasks(s tasks.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
@@ -59,7 +62,7 @@ func SearchTasks(s tasks.Service) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, result)
 		}
 
-		tasks, err := s.SearchTasks(ctx, session.Id, session.CodeRole)
+		tasks, err := s.GetTasks(ctx, session.Id, session.CodeRole)
 		if err != nil {
 			result.Message = fmt.Sprintf("error to get tasks: %v", err)
 			return c.JSON(http.StatusInternalServerError, result)
@@ -72,5 +75,36 @@ func SearchTasks(s tasks.Service) echo.HandlerFunc {
 		}
 
 		return c.JSON(httpStatus, tasks)
+	}
+}
+
+func GetTaskById(s tasks.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+
+		taskId, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			result.Message = "error to parse id"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		session := GetAuthSession(c)
+
+		if session.Id == 0 {
+			result.Message = "user unauthorized"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		task, err := s.GetTaskById(ctx, taskId, session.Id, session.CodeRole)
+		if err != nil {
+			if errors.Is(err, repository.ErrNoTaskInResult) {
+				return c.JSON(http.StatusNoContent, nil)
+			}
+
+			result.Message = fmt.Sprintf("error to get task by id: %v", err)
+			return c.JSON(http.StatusInternalServerError, result)
+		}
+
+		return c.JSON(http.StatusOK, task)
 	}
 }

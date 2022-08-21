@@ -80,7 +80,7 @@ func (suite *TasksTestSuite) TestCreateTask() {
 	}
 }
 
-func (suite *TasksTestSuite) TestSearchTasks() {
+func (suite *TasksTestSuite) TestGetTasks() {
 	_, err := createTask("teste search", "this test should return test", TechnicianUser.Id)
 	suite.NoError(err)
 
@@ -110,7 +110,7 @@ func (suite *TasksTestSuite) TestSearchTasks() {
 
 			c, rr := createContextAuth(http.MethodGet, "/tasks", nil, cases[key].user)
 
-			handler := SearchTasks(TasksService)
+			handler := GetTasks(TasksService)
 
 			err := handler(c)
 

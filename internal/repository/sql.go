@@ -19,7 +19,7 @@ var (
 	sqlCreateTask = `
 		INSERT INTO tasks (title, description, created_by_user_id) VALUES(?, ?, ?)
 	`
-	sqlSearchTasks = `
+	sqlGetTasks = `
 		SELECT
 			t.id,
 			t.title,

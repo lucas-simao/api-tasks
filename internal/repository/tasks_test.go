@@ -65,7 +65,7 @@ func (suite *TasksTestSuite) TestCreateTask() {
 	}
 }
 
-func (suite *TasksTestSuite) TestSearchTasks() {
+func (suite *TasksTestSuite) TestGetTasks() {
 
 	_, err := repo.CreateTask(suite.ctx, entity.TaskRequest{
 		Title:       "test1",
@@ -101,7 +101,7 @@ func (suite *TasksTestSuite) TestSearchTasks() {
 
 	for _, key := range keys {
 		suite.Run(key, func() {
-			tasks, err := repo.SearchTasks(suite.ctx, cases[key].userId, cases[key].roleCode)
+			tasks, err := repo.GetTasks(suite.ctx, cases[key].userId, cases[key].roleCode)
 			if err != nil {
 				suite.Equal(cases[key].err, err)
 				return
