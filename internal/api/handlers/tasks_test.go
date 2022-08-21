@@ -174,6 +174,63 @@ func (suite *TasksTestSuite) TestGetTaskById() {
 	}
 }
 
+func (suite *TasksTestSuite) TestDeleteTaskById() {
+	taskId, err := createTask("test delete task", "this test should delete it", TechnicianUser.Id)
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		taskId     int
+		user       entity.User
+		statusCode int
+	}{
+		"1 - Should return 200": {
+			user:       ManagerUser,
+			taskId:     int(taskId),
+			statusCode: http.StatusOK,
+		},
+		"2 - Should return 400 - Technician can't delete tasks": {
+			user:       TechnicianUser,
+			taskId:     int(taskId),
+			statusCode: http.StatusBadRequest,
+		},
+		"3 - Should return 204 - task has already been deleted": {
+			user:       ManagerUser,
+			taskId:     int(taskId),
+			statusCode: http.StatusNoContent,
+		},
+		"3 - Should return 204 - task not exist": {
+			user:       ManagerUser,
+			taskId:     0,
+			statusCode: http.StatusNoContent,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+
+			c, rr := createContextAuth(http.MethodGet, "/tasks/:id", nil, cases[key].user)
+
+			c.SetParamNames("id")
+			c.SetParamValues(strconv.Itoa(cases[key].taskId))
+
+			handler := DeleteTaskById(TasksService)
+
+			err := handler(c)
+
+			suite.NoError(err)
+
+			suite.Equal(cases[key].statusCode, rr.Code, rr.Body)
+		})
+	}
+}
+
 func createTask(title, description string, userId int) (int64, error) {
 	result, err := DB.Exec(`INSERT INTO tasks (title, description, created_by_user_id) VALUES(?, ?, ?)`, title, description, userId)
 	if err != nil {
