@@ -7,7 +7,7 @@
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker-compose](https://docs.docker.com/compose/)
 * [Postman](https://www.postman.com/downloads/) <b><-Import postman collection from /scripts/API TASKS.postman_collection.json</b>
-
+* MySQL 8
 ### See all help commands
 ```
 make help
