@@ -171,3 +171,49 @@ func (suite *TasksTestSuite) TestGetTaskById() {
 		})
 	}
 }
+
+func (suite *TasksTestSuite) TestDeleteTaskById() {
+	title := "test delete"
+	description := "test2 for test2"
+	taskId, err := repo.CreateTask(suite.ctx, entity.TaskRequest{
+		Title:       title,
+		Description: description,
+		UserId:      TechnicianUser.Id,
+	})
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		userId, taskId int
+		err            error
+	}{
+		"1 - Should delete tasks": {
+			userId: ManagerUser.Id,
+			taskId: int(taskId),
+			err:    nil,
+		},
+		"2 - Shouldn't delete - return error": {
+			userId: ManagerUser.Id,
+			taskId: 0,
+			err:    ErrNoTaskInResult,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+			err := repo.DeleteTaskById(suite.ctx, cases[key].taskId, cases[key].userId)
+			if cases[key].err != nil {
+				suite.Equal(cases[key].err, err)
+				return
+			}
+
+			suite.NoError(err)
+		})
+	}
+}
