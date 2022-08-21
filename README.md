@@ -17,7 +17,7 @@ make help
 ### Create database tables
 * copy and execute all content inside the scripts/migrations/*.up.sql
 
-### Run api - teste only
+### Run api - development only
 ```
 make copy-env   #Copy .env.example to home 
 make api-up     #Run api
