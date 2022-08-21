@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"time"
-
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/golang-jwt/jwt"
 )
@@ -75,7 +73,7 @@ type TaskResponse struct {
 	Id          int                       `json:"id"`
 	Title       string                    `json:"title"`
 	Description string                    `json:"description"`
-	UpdatedAt   time.Time                 `json:"updatedAt"`
+	UpdatedAt   string                    `json:"updatedAt"`
 	FinishedAt  string                    `json:"finishedAt"`
 	CreatedBy   TaskUserOperationResponse `json:"createdBy"`
 	DeletedBy   TaskUserOperationResponse `json:"deletedBy"`

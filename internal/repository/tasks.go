@@ -110,3 +110,20 @@ func (r *repository) GetTaskById(ctx context.Context, taskId, userId, roleCode i
 
 	return t, nil
 }
+
+func (r *repository) DeleteTaskById(ctx context.Context, taskId, userId int) error {
+	result, err := r.db.ExecContext(ctx, sqlDeleteTaskById, userId, taskId)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if id == 0 {
+		return ErrNoTaskInResult
+	}
+
+	return nil
+}

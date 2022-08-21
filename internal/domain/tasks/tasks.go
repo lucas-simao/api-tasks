@@ -28,3 +28,7 @@ func (s service) GetTasks(ctx context.Context, userId, roleCode int) ([]entity.T
 func (s service) GetTaskById(ctx context.Context, taskId, userId, roleCode int) (entity.TaskResponse, error) {
 	return s.repository.GetTaskById(ctx, taskId, userId, roleCode)
 }
+
+func (s service) DeleteTaskById(ctx context.Context, taskId, userId int) error {
+	return s.repository.DeleteTaskById(ctx, taskId, userId)
+}

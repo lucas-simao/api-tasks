@@ -22,6 +22,7 @@ func addRoutes(e *echo.Echo, s Services) {
 	auth.POST("/tasks", handlers.CreateTask(s.Tasks))
 	auth.GET("/tasks", handlers.GetTasks(s.Tasks))
 	auth.GET("/tasks/:id", handlers.GetTaskById(s.Tasks))
+	auth.DELETE("/tasks/:id", handlers.DeleteTaskById(s.Tasks))
 }
 
 func JwtConfig() middleware.JWTConfig {

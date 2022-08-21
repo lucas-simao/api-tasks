@@ -10,4 +10,5 @@ type Service interface {
 	CreateTask(context.Context, entity.TaskRequest) (int64, error)
 	GetTasks(context.Context, int, int) ([]entity.TaskResponse, error)
 	GetTaskById(context.Context, int, int, int) (entity.TaskResponse, error)
+	DeleteTaskById(context.Context, int, int) error
 }

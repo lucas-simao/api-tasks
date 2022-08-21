@@ -108,3 +108,34 @@ func GetTaskById(s tasks.Service) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, task)
 	}
 }
+
+func DeleteTaskById(s tasks.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+
+		taskId, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			result.Message = "error to parse id"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		session := GetAuthSession(c)
+
+		if session.CodeRole != entity.ManagerRole {
+			result.Message = "user don't have permission to delete tasks"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		err = s.DeleteTaskById(ctx, taskId, session.Id)
+		if err != nil {
+			if errors.Is(err, repository.ErrNoTaskInResult) {
+				return c.JSON(http.StatusNoContent, nil)
+			}
+			result.Message = fmt.Sprintf("error to delete task: %v", err)
+			return c.JSON(http.StatusInternalServerError, result)
+		}
+
+		result.Message = fmt.Sprintf("task %d deleted", taskId)
+		return c.JSON(http.StatusOK, result)
+	}
+}
