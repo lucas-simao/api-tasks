@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -111,6 +112,58 @@ func (suite *TasksTestSuite) TestGetTasks() {
 			c, rr := createContextAuth(http.MethodGet, "/tasks", nil, cases[key].user)
 
 			handler := GetTasks(TasksService)
+
+			err := handler(c)
+
+			suite.NoError(err)
+
+			suite.Equal(cases[key].statusCode, rr.Code, rr.Body)
+		})
+	}
+}
+
+func (suite *TasksTestSuite) TestGetTaskById() {
+	taskId, err := createTask("teste search", "this test should return test", TechnicianUser.Id)
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		taskId     int
+		user       entity.User
+		statusCode int
+	}{
+		"1 - Should return 200": {
+			taskId:     int(taskId),
+			user:       TechnicianUser,
+			statusCode: http.StatusOK,
+		},
+		"2 - Should return 200 - Manager can see any task": {
+			user:       ManagerUser,
+			taskId:     int(taskId),
+			statusCode: http.StatusOK,
+		},
+		"2 - Should return 204 - task not exist": {
+			user:       TechnicianUser,
+			taskId:     0,
+			statusCode: http.StatusNoContent,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+
+			c, rr := createContextAuth(http.MethodGet, "/tasks/:id", nil, cases[key].user)
+
+			c.SetParamNames("id")
+			c.SetParamValues(strconv.Itoa(cases[key].taskId))
+
+			handler := GetTaskById(TasksService)
 
 			err := handler(c)
 
