@@ -64,7 +64,7 @@ func ContainerRun(port string) *Container {
 
 	var mysqlUrl = fmt.Sprintf(dataSource, user, password, port, database)
 
-	db, err := sqlx.Connect("mysql", mysqlUrl)
+	db, err := sqlx.Open("mysql", mysqlUrl)
 	if err != nil {
 		log.Panic(err)
 		return &Container{}
