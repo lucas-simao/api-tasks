@@ -217,3 +217,113 @@ func (suite *TasksTestSuite) TestDeleteTaskById() {
 		})
 	}
 }
+
+func (suite *TasksTestSuite) TestUpdateTaskById() {
+	title := "test update"
+	description := "test3 for test3"
+	taskId, err := repo.CreateTask(suite.ctx, entity.TaskRequest{
+		Title:       title,
+		Description: description,
+		UserId:      TechnicianUser.Id,
+	})
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		updateData entity.TaskUpdateRequest
+		err        error
+	}{
+		"1 - Should update task": {
+			updateData: entity.TaskUpdateRequest{
+				Id:          int(taskId),
+				UserId:      TechnicianUser.Id,
+				Title:       "New title",
+				Description: "New description",
+			},
+			err: nil,
+		},
+		"2 - Shouldn't update - without valid user": {
+			updateData: entity.TaskUpdateRequest{
+				Id:          int(taskId),
+				UserId:      0,
+				Title:       "New title",
+				Description: "New description",
+			},
+			err: ErrNoTaskInResult,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+			task, err := repo.UpdateTaskById(suite.ctx, cases[key].updateData)
+			if cases[key].err != nil {
+				suite.Equal(cases[key].err, err)
+				return
+			}
+
+			suite.NoError(err)
+			suite.Equal(cases[key].updateData.Id, task.Id)
+			suite.Equal(cases[key].updateData.Title, task.Title)
+			suite.Equal(cases[key].updateData.Description, task.Description)
+			suite.Equal(cases[key].updateData.UserId, task.CreatedBy.Id)
+		})
+	}
+}
+
+func (suite *TasksTestSuite) TestFinishTaskById() {
+	title := "test update"
+	description := "test3 for test3"
+	taskId, err := repo.CreateTask(suite.ctx, entity.TaskRequest{
+		Title:       title,
+		Description: description,
+		UserId:      TechnicianUser.Id,
+	})
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		taskId, userId int
+		err            error
+	}{
+		"1 - Should finish task": {
+			taskId: int(taskId),
+			userId: TechnicianUser.Id,
+			err:    nil,
+		},
+		"2 - Shouldn't finish - is not same user task": {
+			taskId: int(taskId),
+			userId: 0,
+			err:    ErrNoTaskInResult,
+		},
+		"3 - Shouldn't finish - without valid task id": {
+			taskId: 0,
+			userId: TechnicianUser.Id,
+			err:    ErrNoTaskInResult,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+			task, err := repo.FinishTaskById(suite.ctx, cases[key].taskId, cases[key].userId)
+			if cases[key].err != nil {
+				suite.Equal(cases[key].err, err)
+				return
+			}
+
+			suite.NoError(err)
+			suite.NotEmpty(task.FinishedAt)
+		})
+	}
+}
