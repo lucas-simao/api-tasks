@@ -45,6 +45,8 @@ func (r *repository) GetTasks(ctx context.Context, userId, roleCode int) ([]enti
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	var tasks = []entity.TaskResponse{}
 
 	for rows.Next() {
