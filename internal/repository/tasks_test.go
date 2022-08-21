@@ -116,3 +116,58 @@ func (suite *TasksTestSuite) TestGetTasks() {
 		})
 	}
 }
+
+func (suite *TasksTestSuite) TestGetTaskById() {
+	title := "test1"
+	description := "test1 for test1"
+	taskId, err := repo.CreateTask(suite.ctx, entity.TaskRequest{
+		Title:       title,
+		Description: description,
+		UserId:      TechnicianUser.Id,
+	})
+	suite.NoError(err)
+
+	cases := map[string]struct {
+		userId, roleCode, taskId int
+		err                      error
+	}{
+		"1 - Should return tasks": {
+			userId:   TechnicianUser.Id,
+			roleCode: TechnicianUser.CodeRole,
+			taskId:   int(taskId),
+			err:      nil,
+		},
+		"2 - Shouldn't return": {
+			userId:   TechnicianUser.Id,
+			roleCode: TechnicianUser.CodeRole,
+			taskId:   0,
+			err:      ErrNoTaskInResult,
+		},
+	}
+
+	keys := make([]string, 0, len(cases))
+	for v := range cases {
+		keys = append(keys, v)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		suite.Run(key, func() {
+			task, err := repo.GetTaskById(suite.ctx, cases[key].taskId, cases[key].userId, cases[key].roleCode)
+			if cases[key].err != nil {
+				suite.Equal(cases[key].err, err)
+				return
+			}
+
+			suite.NoError(err)
+			suite.Equal(cases[key].taskId, task.Id)
+			suite.Equal(title, task.Title)
+			suite.Equal(description, task.Description)
+			suite.Equal(TechnicianUser.Id, task.CreatedBy.Id)
+			suite.Equal(TechnicianUser.Name, task.CreatedBy.Name)
+			suite.Equal(0, task.DeletedBy.Id)
+			suite.Equal("", task.FinishedAt)
+		})
+	}
+}
