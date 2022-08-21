@@ -65,7 +65,12 @@ func SignIn(u users.Service) echo.HandlerFunc {
 
 		token, err := u.SignIn(ctx, p)
 		if err != nil {
-			if errors.Is(err, users.ErrWrongPassword) || errors.Is(err, users.ErrUserWithoutValidRole) {
+			if errors.Is(err, users.ErrWrongPassword) {
+				result.Message = fmt.Sprintf("%v", err)
+				return c.JSON(http.StatusBadRequest, result)
+			}
+
+			if errors.Is(err, users.ErrUserWithoutValidRole) {
 				result.Message = fmt.Sprintf("%v", err)
 				return c.JSON(http.StatusForbidden, result)
 			}

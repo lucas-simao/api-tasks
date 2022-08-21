@@ -121,9 +121,56 @@ func (r *repository) DeleteTaskById(ctx context.Context, taskId, userId int) err
 	if err != nil {
 		return err
 	}
+
 	if id == 0 {
 		return ErrNoTaskInResult
 	}
 
 	return nil
+}
+
+func (r *repository) UpdateTaskById(ctx context.Context, task entity.TaskUpdateRequest) (entity.TaskResponse, error) {
+	result, err := r.db.ExecContext(ctx, sqlUpdateTaskById, task.Title, task.Description, task.UserId, task.Id)
+	if err != nil {
+		return entity.TaskResponse{}, err
+	}
+
+	idAffected, err := result.RowsAffected()
+	if err != nil {
+		return entity.TaskResponse{}, err
+	}
+
+	if idAffected == 0 {
+		return entity.TaskResponse{}, ErrNoTaskInResult
+	}
+
+	taskUpdated, err := r.GetTaskById(ctx, task.Id, task.UserId, entity.TechnicianRole)
+	if err != nil {
+		return entity.TaskResponse{}, err
+	}
+
+	return taskUpdated, nil
+}
+
+func (r *repository) FinishTaskById(ctx context.Context, taskId, userId int) (entity.TaskResponse, error) {
+	result, err := r.db.ExecContext(ctx, sqlDoneTaskById, userId, taskId)
+	if err != nil {
+		return entity.TaskResponse{}, err
+	}
+
+	idAffected, err := result.RowsAffected()
+	if err != nil {
+		return entity.TaskResponse{}, err
+	}
+
+	if idAffected == 0 {
+		return entity.TaskResponse{}, ErrNoTaskInResult
+	}
+
+	taskUpdated, err := r.GetTaskById(ctx, taskId, userId, entity.TechnicianRole)
+	if err != nil {
+		return entity.TaskResponse{}, err
+	}
+
+	return taskUpdated, nil
 }

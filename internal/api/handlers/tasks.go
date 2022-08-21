@@ -139,3 +139,80 @@ func DeleteTaskById(s tasks.Service) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, result)
 	}
 }
+
+func UpdateTaskById(s tasks.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+
+		p := entity.TaskUpdateRequest{}
+
+		err := c.Bind(&p)
+		if err != nil {
+			result.Message = fmt.Sprintf("error to bind body: %v", err)
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		err = p.Validate()
+		if err != nil {
+			result.Message = fmt.Sprintf("error to validate: %v", err)
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		taskId, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			result.Message = "error to parse id"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		session := GetAuthSession(c)
+
+		p.Id = taskId
+		p.UserId = session.Id
+
+		if session.CodeRole != entity.TechnicianRole {
+			result.Message = "user don't have permission to update tasks"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		task, err := s.UpdateTaskById(ctx, p)
+		if err != nil {
+			if errors.Is(err, repository.ErrNoTaskInResult) {
+				return c.JSON(http.StatusNoContent, nil)
+			}
+			result.Message = fmt.Sprintf("error to update task: %v", err)
+			return c.JSON(http.StatusInternalServerError, result)
+		}
+
+		return c.JSON(http.StatusOK, task)
+	}
+}
+
+func FinishTaskById(s tasks.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+
+		taskId, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			result.Message = "error to parse id"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		session := GetAuthSession(c)
+
+		if session.CodeRole != entity.TechnicianRole {
+			result.Message = "user don't have permission to finish tasks"
+			return c.JSON(http.StatusBadRequest, result)
+		}
+
+		task, err := s.FinishTaskById(ctx, taskId, session.Id)
+		if err != nil {
+			if errors.Is(err, repository.ErrNoTaskInResult) {
+				return c.JSON(http.StatusNoContent, nil)
+			}
+			result.Message = fmt.Sprintf("error to finish task: %v", err)
+			return c.JSON(http.StatusInternalServerError, result)
+		}
+
+		return c.JSON(http.StatusOK, task)
+	}
+}

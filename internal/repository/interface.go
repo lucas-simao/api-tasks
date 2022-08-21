@@ -19,4 +19,6 @@ type Repository interface {
 	GetTasks(context.Context, int, int) ([]entity.TaskResponse, error)
 	GetTaskById(context.Context, int, int, int) (entity.TaskResponse, error)
 	DeleteTaskById(context.Context, int, int) error
+	UpdateTaskById(context.Context, entity.TaskUpdateRequest) (entity.TaskResponse, error)
+	FinishTaskById(context.Context, int, int) (entity.TaskResponse, error)
 }

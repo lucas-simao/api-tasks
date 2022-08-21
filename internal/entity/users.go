@@ -84,3 +84,16 @@ type TaskUserOperationResponse struct {
 	Name string `json:"name"`
 	Date string `json:"date"`
 }
+
+type TaskUpdateRequest struct {
+	Id          int    `json:"-"`
+	UserId      int    `json:"-"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+func (c TaskUpdateRequest) Validate() error {
+	return validation.ValidateStruct(&c,
+		validation.Field(&c.Title, validation.Required, validation.Length(1, 100)),
+		validation.Field(&c.Description, validation.Required, validation.Length(1, 2500)))
+}

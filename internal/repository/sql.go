@@ -45,4 +45,19 @@ var (
 			deleted_at = now()
 		WHERE deleted_at IS NULL AND id = ?
 	`
+
+	sqlUpdateTaskById = `
+		UPDATE tasks 
+		SET 
+			title = ?,
+			description = ?
+		WHERE deleted_at IS NULL AND finished_at IS NULL AND created_by_user_id = ? AND id = ?
+	`
+
+	sqlDoneTaskById = `
+		UPDATE tasks 
+		SET 
+			finished_at = now()
+		WHERE deleted_at IS NULL AND finished_at IS NULL AND created_by_user_id = ? AND id = ?
+	`
 )

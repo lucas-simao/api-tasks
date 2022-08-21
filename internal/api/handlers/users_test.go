@@ -118,9 +118,9 @@ func (suite *UsersTestSuite) TestSignIn() {
 			body:       `{ "username": "lucasSimao", "password": ""}`,
 			statusCode: http.StatusBadRequest,
 		},
-		"4 - Should return 403 - wrong password": {
+		"4 - Should return 400 - wrong password": {
 			body:       `{ "username": "lucasSimao", "password": "12345"}`,
-			statusCode: http.StatusForbidden,
+			statusCode: http.StatusBadRequest,
 		},
 		"5 - Should return 200": {
 			body:       `{ "username": "lucasSimao", "password": "123456"} `,
