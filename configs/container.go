@@ -19,7 +19,6 @@ var (
 	user       = "root"
 	password   = "secret"
 	database   = "api"
-	port       = "3322"
 	dataSource = "%s:%s@tcp(localhost:%s)/%s?parseTime=true"
 )
 
@@ -29,7 +28,7 @@ type Container struct {
 	resource *dockertest.Resource
 }
 
-func ContainerRun() *Container {
+func ContainerRun(port string) *Container {
 	pool, err := dockertest.NewPool("")
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)

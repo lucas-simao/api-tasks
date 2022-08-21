@@ -30,7 +30,8 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	newContainer := configs.ContainerRun()
+	port := "3322"
+	newContainer := configs.ContainerRun(port)
 	newContainer.RunMigrations("../../scripts/migrations")
 	repo = New()
 	DB = newContainer.DB
