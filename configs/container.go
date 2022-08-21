@@ -60,7 +60,7 @@ func ContainerRun(port string) *Container {
 		log.Fatalf("Could not start resource: %s", err.Error())
 	}
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	var mysqlUrl = fmt.Sprintf(dataSource, user, password, port, database)
 
