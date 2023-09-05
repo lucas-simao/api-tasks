@@ -9,6 +9,4 @@ type MockNotifications struct {
 	mock.Mock
 }
 
-func (ref *MockNotifications) NotifyManager(t entity.TaskResponse) {
-	return
-}
+func (ref *MockNotifications) NotifyManager(t entity.TaskResponse) {}
