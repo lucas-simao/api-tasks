@@ -2,7 +2,6 @@ package configs
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -98,7 +97,7 @@ func (c *Container) RunMigrations(migrationsDir string) {
 
 	for i := range files {
 		if strings.Contains(files[i].Name(), extensionNameUpMigrations) {
-			fileData, err := ioutil.ReadFile(fmt.Sprintf("%v/%v", migrationsDir, files[i].Name()))
+			fileData, err := os.ReadFile(fmt.Sprintf("%v/%v", migrationsDir, files[i].Name()))
 			if err != nil {
 				log.Fatalf("Error read file: %s, %v", files[i].Name(), err)
 			}
