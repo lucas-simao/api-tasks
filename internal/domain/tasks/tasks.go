@@ -9,12 +9,14 @@ import (
 )
 
 type service struct {
-	repository repository.Repository
+	repository    repository.Repository
+	notifications notifications.Notifications
 }
 
-func New(r repository.Repository) Service {
+func New(r repository.Repository, n notifications.Notifications) Service {
 	return service{
-		repository: r,
+		repository:    r,
+		notifications: n,
 	}
 }
 
@@ -43,7 +45,7 @@ func (s service) FinishTaskById(ctx context.Context, taskId, userId int) (entity
 
 	go func() {
 		if err == nil {
-			notifications.NotifyManager(task)
+			s.notifications.NotifyManager(task)
 		}
 	}()
 

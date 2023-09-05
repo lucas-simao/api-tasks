@@ -8,6 +8,7 @@ import (
 	"github.com/lucas-simao/api-tasks/internal/api"
 	"github.com/lucas-simao/api-tasks/internal/domain/tasks"
 	"github.com/lucas-simao/api-tasks/internal/domain/users"
+	"github.com/lucas-simao/api-tasks/internal/gateway/notifications"
 	"github.com/lucas-simao/api-tasks/internal/repository"
 )
 
@@ -23,8 +24,10 @@ func main() {
 	// Database
 	repo := repository.New()
 
+	notifications := notifications.New()
+
 	// Domains
-	tasks := tasks.New(repo)
+	tasks := tasks.New(repo, notifications)
 	users := users.New(repo)
 
 	// Api

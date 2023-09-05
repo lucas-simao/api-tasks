@@ -14,6 +14,7 @@ import (
 	"github.com/lucas-simao/api-tasks/internal/domain/tasks"
 	"github.com/lucas-simao/api-tasks/internal/domain/users"
 	"github.com/lucas-simao/api-tasks/internal/entity"
+	"github.com/lucas-simao/api-tasks/internal/gateway/notifications"
 	"github.com/lucas-simao/api-tasks/internal/repository"
 	"github.com/lucas-simao/api-tasks/internal/utils"
 )
@@ -46,8 +47,10 @@ func TestMain(m *testing.M) {
 	repo = repository.New()
 	DB = newContainer.DB
 
+	notificationsMock := notifications.MockNotifications{}
+
 	UsersService = users.New(repo)
-	TasksService = tasks.New(repo)
+	TasksService = tasks.New(repo, &notificationsMock)
 
 	// Register Technician
 	signUpTechnician(TechnicianUser)
